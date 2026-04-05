@@ -13,6 +13,10 @@ fn read_file(path: String) -> Result<String, String> {
 
 #[tauri::command]
 fn write_file(path: String, content: String) -> Result<(), String> {
+    // 💡 ファイルの保存先フォルダが存在しない場合は、自動で親フォルダごと作成する
+    if let Some(parent) = std::path::Path::new(&path).parent() {
+        let _ = std::fs::create_dir_all(parent);
+    }
     std::fs::write(path, content).map_err(|e| e.to_string())
 }
 
@@ -29,7 +33,7 @@ fn main() {
                 .tooltip("Task Master")
                 .icon(app.default_window_icon().unwrap().clone())
                 .menu(&menu)
-                .menu_on_left_click(true)
+                .show_menu_on_left_click(true)
                 .on_menu_event(|app, event| {
                     if event.id() == "quit" { app.exit(0); }
                 })

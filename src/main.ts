@@ -86,15 +86,12 @@ function deleteAction(row: any) {
   }
 }
 
-// 💡 統計用のクールな専用モーダル
 function showStatsModal(contentHtml: string) {
   const overlay = document.createElement("div");
-  // 背景をより暗く、サイバーに
   overlay.style.cssText = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,5,10,0.9);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);";
   
   const box = document.createElement("div");
   box.className = "cyber-modal";
-  // クールなタイトルと閉じるボタンだけを配置
   box.innerHTML = `
     <div class="cyber-title">TASKMASTER PRO - ANALYTICS</div>
     ${contentHtml}
@@ -122,6 +119,8 @@ function showStatsModal(contentHtml: string) {
   };
   document.addEventListener("keydown", escHandler);
 }
+
+// 💡 設定モーダルのバグ修正版
 async function showSettings(currentPath: string): Promise<string | null> {
   return new Promise((resolve) => {
     const overlay = document.createElement("div");
@@ -132,12 +131,10 @@ async function showSettings(currentPath: string): Promise<string | null> {
     box.style.width = "700px";
     box.innerHTML = `
       <div class="cyber-title">SYSTEM CONFIGURATION</div>
-      
       <div class="cyber-panel" style="margin-bottom: 20px;">
         <div class="cyber-header">DATA & CSV PATH</div>
         <input type="text" id="path-input" class="cyber-input" value="${currentPath}" spellcheck="false">
       </div>
-
       <div class="cyber-panel">
         <div class="cyber-header">KEYBOARD OVERRIDES</div>
         <div class="cyber-shortcuts">
@@ -151,7 +148,6 @@ async function showSettings(currentPath: string): Promise<string | null> {
           <div class="shortcut-item"><span class="cyber-key">Ctrl</span> + <span class="cyber-key">S</span> EXPORT</div>
         </div>
       </div>
-
       <div style="display:flex;justify-content:flex-end;gap:15px;margin-top:30px;">
         <button id="path-cancel" class="cyber-btn-outline">CANCEL [ESC]</button>
         <button id="path-save" class="cyber-btn-solid">SAVE [ENTER]</button>
@@ -170,19 +166,22 @@ async function showSettings(currentPath: string): Promise<string | null> {
       if (activeRow) activeRow.getElement().focus();
     };
 
+    // 💡 値を取得してから画面を消す（順番の修正）
     document.getElementById("path-cancel")!.onclick = () => { cleanup(); resolve(null); };
-    document.getElementById("path-save")!.onclick = () => { cleanup(); resolve(inputEl.value); };
+    document.getElementById("path-save")!.onclick = () => { 
+      const val = inputEl.value;
+      cleanup(); 
+      resolve(val); 
+    };
 
     const keyHandler = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        e.preventDefault();
-        cleanup();
-        resolve(null);
+        e.preventDefault(); cleanup(); resolve(null);
       }
       if (e.key === "Enter") {
         e.preventDefault();
-        cleanup();
-        resolve(inputEl.value);
+        const val = inputEl.value;
+        cleanup(); resolve(val);
       }
     };
     document.addEventListener("keydown", keyHandler);
@@ -282,7 +281,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (confirm("Clear all?")) { table?.clearData(); activeRow = null; autoSave(); }
   });
 
-  // 💡 ここを変更！ alert をやめて、専用モーダルを呼び出す
   document.getElementById("show-stats")?.addEventListener("click", () => {
     if (!table) return;
     const htmlContent = analyzeEstAct(table.getData());
@@ -306,19 +304,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.getElementById("filter-date")?.addEventListener("input", applyFilters);
   
+  // 💡 設定ボタン処理の強化（不要な文字を消去し、アラートを表示）
   document.getElementById("set-path")?.addEventListener("click", async () => {
-    const currentPath = localStorage.getItem(PATH_KEY) || "C:\\Users\\";
+    const currentPath = localStorage.getItem(PATH_KEY) || "C:\\";
     const newPath = await showSettings(currentPath);
     if (newPath) {
-      localStorage.setItem(PATH_KEY, newPath.replace(/\\$/, ''));
-      autoSave(); 
+      // 末尾の円マークや誤って入れたダブルクオーテーションを除去
+      const cleanPath = newPath.replace(/\\$/, '').replace(/"/g, ''); 
+      localStorage.setItem(PATH_KEY, cleanPath);
+      await autoSave(); 
+      alert(`✅ 保存先を更新しました！\n\nパス: ${cleanPath}\n\n※データ(tasks.json)の同期が完了しました。`);
     }
   });
 
+  // 💡 CSVエクスポート処理の強化（結果をアラートで通知）
   document.getElementById("export-csv")?.addEventListener("click", async () => {
     if (!table) return;
     const folderPath = localStorage.getItem(PATH_KEY);
-    if (!folderPath) { alert("Path not set."); return; }
+    if (!folderPath) { alert("⚠️ まずは歯車アイコンから保存先フォルダを設定してください。"); return; }
+    
     const fullPath = `${folderPath}\\tasks_${getTodayStr().replace(/\//g, '')}.csv`;
     try {
       const data = table.getData("active");
@@ -326,10 +330,16 @@ document.addEventListener("DOMContentLoaded", () => {
       const rows = data.map((d: any) => [d.createdAt || "", d.doneDate || "", d.status, d.category, d.subject, d.priority, d.estTime, d.actTime, d.deadline || "", `"${(d.notes || "").replace(/"/g, '""')}"`]);
       const bom = "\uFEFF";
       const csvContent = bom + [headers.join(","), ...rows.map((r: any) => r.join(","))].join("\n");
+      
       await invoke("write_file", { path: fullPath, content: csvContent });
+      
       const btn = document.getElementById("export-csv");
       if (btn) { btn.innerText = "Saved!"; setTimeout(() => btn.innerText = "Export CSV", 1500); }
-    } catch (err) { alert(`Error: ${err}`); }
+      
+      alert(`✅ CSVを出力しました！\n\n保存先: ${fullPath}`);
+    } catch (err) { 
+      alert(`❌ エラーが発生しました:\n${err}\n\n※Excelで同名のCSVを開いている場合は、閉じてから再度お試しください。`); 
+    }
   });
   
   init();
