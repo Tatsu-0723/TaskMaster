@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Task Master</title>
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1><span>Task Master</span></h1>
+        <div class="controls">
+          <input type="text" id="filter-date" placeholder="Added (YYYYMMDD)" title="Filter by Added Date" style="width: 140px;" />
+          <input type="text" id="search-input" placeholder="Search (/ to focus)" />
+          <select id="filter-status">
+            <option value="">All Status</option>
+            <option value="To Do">To Do</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Pending">Pending</option>
+            <option value="Done">Done</option>
+          </select>
+          <div class="export-group">
+            
+            <button id="show-stats" class="icon-btn" title="Task Analytics">
+              <svg viewBox="0 0 24 24" class="neon-svg">
+                <circle cx="12" cy="12" r="11" class="neon-circle" />
+                <rect x="6.5" y="10" width="2.5" height="7" rx="1" class="neon-bar-green" />
+                <rect x="10.75" y="13" width="2.5" height="4" rx="1" class="neon-bar-red" />
+                <rect x="15" y="7" width="2.5" height="10" rx="1" class="neon-bar-cyan" />
+              </svg>
+            </button>
+
+            <button id="set-path" class="icon-btn" title="Settings & Usage">
+              <svg viewBox="0 0 24 24" class="neon-svg">
+                <circle cx="12" cy="12" r="3" class="neon-gear" />
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z" class="neon-gear" />
+              </svg>
+            </button>
+
+            <button id="export-csv" title="Export CSV (Ctrl+S)">Export CSV</button>
+          </div>
+          <button id="add-task">+ Add Task (Ctrl++)</button>
+          <button id="all-delete" title="Delete All Tasks">All Delete</button>
+        </div>
+      </div>
+      <div id="task-table"></div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

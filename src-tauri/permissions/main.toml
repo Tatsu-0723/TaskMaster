@@ -1,0 +1,4 @@
+[[permission]]
+identifier = "allow-fs"
+description = "Allows reading and writing files"
+commands.allow = ["read_file", "write_file"]

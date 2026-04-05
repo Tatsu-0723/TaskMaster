@@ -1,0 +1,693 @@
+/* =========================================
+   Task Master - Modern Dark UI Theme
+========================================= */
+
+:root {
+  --bg-main: #0f111a;
+  --bg-panel: #1a1d27;
+  --bg-hover: #232736;
+  --text-main: #e2e8f0;
+  --text-muted: #94a3b8;
+  --border-color: #2e3440;
+  --accent: #06b6d4;
+  --accent-glow: rgba(6, 182, 212, 0.4);
+  --color-todo: #0ea5e9;
+  --color-working: #8b5cf6;
+  --color-pending: #f59e0b;
+  --color-done: #10b981;
+  --color-danger: #ef4444;
+}
+
+body {
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  margin: 0;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  overflow-x: hidden;
+}
+
+.container { padding: 30px; max-width: 1600px; margin: 0 auto; }
+
+/* =========================================
+   Task Master - Title (Cyberpunk Style)
+========================================= */
+.header h1 {
+  margin: 0;
+  font-size: 2rem;
+  font-family: 'Courier New', Consolas, monospace; /* 💡 サイバーパンク風フォント */
+  font-weight: bold;
+  letter-spacing: 3px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  position: relative; /* 💡 子要素(::after)の配置用 */
+}
+
+/* タイトルテキストのネオン効果 */
+.header h1 span {
+  text-shadow: 0 0 10px #0ff, 0 0 20px #0ff;
+}
+
+/* 青い円の外枠 */
+.header h1::before {
+  content: '';
+  display: inline-block;
+  width: 15px;
+  height: 15px;
+  background-color: rgba(0, 255, 255, 0.1);
+  border: 1px solid #0ff;
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.5), inset 0 0 10px rgba(0, 255, 255, 0.2);
+  margin-right: 15px;
+}
+
+/* 円の中の小さなネオン点 */
+.header h1::after {
+  content: '';
+  position: absolute;
+  left: 5px; /* 💡 位置調整（::beforeの中に配置） */
+  top: 50%;
+  transform: translateY(-50%);
+  width: 5px;
+  height: 5px;
+  background-color: #0ff;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #0ff;
+}
+
+/* 💡 カレンダー入力枠も同じデザインを適用 */
+input#search-input, select#filter-status, input#filter-date {
+  background: var(--bg-panel); color: var(--text-main);
+  border: 1px solid var(--border-color); padding: 10px 16px;
+  border-radius: 20px; outline: none; transition: all 0.2s ease;
+}
+input#search-input:focus, select#filter-status:focus, input#filter-date:focus { 
+  border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-glow);
+}
+
+/* 💡 カレンダーアイコンをダークモードでも見やすく白く反転 */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) opacity(0.7);
+  cursor: pointer;
+}
+
+.export-group { display: flex; gap: 8px; align-items: center; }
+button#set-path {
+  background: var(--bg-panel); color: var(--text-muted);
+  border: 1px solid var(--border-color); padding: 8px 12px;
+  border-radius: 20px; cursor: pointer; transition: all 0.2s; font-size: 1rem;
+}
+button#set-path:hover { background: var(--bg-hover); color: var(--accent); border-color: var(--accent); }
+
+button#export-csv {
+  background: transparent; color: var(--text-main); border: 1px solid var(--border-color);
+  padding: 10px 16px; border-radius: 20px; cursor: pointer; font-weight: 600; transition: all 0.2s ease;
+}
+button#export-csv:hover { border-color: var(--text-muted); background: var(--bg-hover); }
+
+button#add-task {
+  background: var(--accent); color: #000; border: none;
+  padding: 10px 20px; border-radius: 20px; cursor: pointer; font-weight: 700; transition: all 0.2s ease;
+}
+button#add-task:hover { transform: translateY(-2px); background: #08c8ea; }
+
+/* --- Tabulator --- */
+.tabulator { background-color: transparent !important; border: none !important; }
+.tabulator-header {
+  background-color: var(--bg-panel) !important;
+  border-bottom: 2px solid var(--border-color) !important;
+  color: var(--text-muted) !important; font-weight: 600 !important;
+}
+.tabulator-col { background-color: transparent !important; border-right: none !important; }
+
+.tabulator-row {
+  background-color: var(--bg-main) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+  transition: background-color 0.2s ease; border-left: 4px solid transparent !important;
+}
+.tabulator-row.active-row {
+  background-color: var(--bg-hover) !important;
+  border-left: 4px solid var(--accent) !important;
+  box-shadow: inset 0 0 10px var(--accent-glow);
+}
+
+.tabulator-cell {
+  white-space: pre-wrap !important; word-wrap: break-word !important;
+  height: auto !important; min-height: 56px;
+  padding: 12px 16px !important; border-right: none !important;
+}
+
+.tabulator-cell.tabulator-editing { 
+  padding: 0 !important; 
+  background-color: var(--bg-panel) !important;
+  box-shadow: inset 0 0 0 1px var(--accent) !important; 
+}
+.tabulator-cell.tabulator-editing textarea,
+.tabulator-cell.tabulator-editing input {
+  background-color: transparent !important; 
+  color: var(--text-main) !important;
+  border: none !important; 
+  outline: none !important;
+  padding: 12px 16px !important; 
+  width: 100% !important; 
+  height: auto !important;
+  min-height: 56px !important;
+  box-sizing: border-box !important; 
+  margin: 0 !important; 
+  border-radius: 0 !important;
+  font-family: inherit; font-size: inherit; 
+  display: block !important;
+  field-sizing: content !important; 
+}
+.tabulator-cell.tabulator-editing textarea { overflow-y: hidden !important; resize: none !important; }
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none !important; margin: 0 !important; }
+input[type="number"] { -moz-appearance: textfield !important; }
+
+.status-badge {
+  border-radius: 12px; font-size: 0.75rem; font-weight: 700; color: #fff;
+  width: 85px; height: 28px; display: flex; align-items: center; justify-content: center;
+}
+.status-badge[data-status="To Do"] { background-color: var(--color-todo); }
+.status-badge[data-status="In Progress"] { background-color: var(--color-working); }
+.status-badge[data-status="Pending"] { background-color: var(--color-pending); }
+.status-badge[data-status="Done"] { background-color: var(--color-done); opacity: 0.6; }
+
+.priority-badge { padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; background: var(--bg-panel); }
+.priority-1 { color: var(--color-danger); }
+.priority-2 { color: var(--color-pending); }
+.priority-3 { color: var(--color-todo); }
+.priority-4 { color: var(--text-muted); }
+
+.delete-btn {
+  background: transparent; color: var(--text-muted); border: none; padding: 8px;
+  border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+.delete-btn svg { width: 18px; height: 18px; transition: transform 0.2s ease; }
+.delete-btn:hover { background: rgba(239, 68, 68, 0.15); color: var(--color-danger); }
+.delete-btn:hover svg { transform: scale(1.1); }
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--bg-main); }
+::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 5px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+.tabulator .tabulator-tableholder::-webkit-scrollbar { height: 12px; }
+.tabulator .tabulator-tableholder::-webkit-scrollbar-track { background: var(--bg-panel); }
+.tabulator .tabulator-tableholder::-webkit-scrollbar-thumb {
+  background: #3b4252; border-radius: 6px; border: 3px solid var(--bg-panel);
+}
+.tabulator .tabulator-tableholder::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+/* --- 既存のスタイルに追加・修正 --- */
+
+/* 💡 全削除ボタン（警告色） */
+button#all-delete {
+  background: transparent; color: var(--color-danger);
+  border: 1px solid var(--color-danger); padding: 10px 16px;
+  border-radius: 20px; cursor: pointer; font-weight: 600; transition: all 0.2s;
+}
+button#all-delete:hover { background: var(--color-danger); color: #000; }
+
+/* 💡 設定モーダル内のUsageガイド用スタイル */
+.usage-guide {
+  margin-top: 20px; padding-top: 15px;
+  border-top: 1px solid var(--border-color);
+  font-size: 0.85rem; color: var(--text-main);
+}
+.usage-guide h4 { margin: 0 0 10px 0; color: var(--accent); }
+.usage-guide ul { padding-left: 20px; margin: 0; color: var(--text-muted); }
+.usage-guide kbd {
+  background: #333; padding: 2px 4px; border-radius: 4px; color: var(--accent);
+  font-family: monospace; border: 1px solid #444;
+}
+/* =========================================
+   📊 Stats Dashboard Modal Styles
+========================================= */
+.stats-grid { 
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; 
+}
+.stat-box { 
+  background: var(--bg-main); padding: 16px; border-radius: 8px; border: 1px solid var(--border-color); text-align: center; 
+}
+.stat-label { 
+  display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;
+}
+.stat-value { 
+  display: block; font-size: 2rem; font-weight: 700; color: var(--accent); 
+}
+.stat-value small { 
+  font-size: 1rem; color: var(--text-muted); 
+}
+
+.stat-ratio-container { 
+  margin-bottom: 24px; background: var(--bg-main); padding: 16px 20px; border-radius: 8px; border: 1px solid var(--border-color); 
+}
+.stat-ratio-header { 
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 0.95rem; color: var(--text-muted); 
+}
+.progress-bar-bg { 
+  height: 12px; background: var(--bg-hover); border-radius: 6px; position: relative; overflow: hidden; 
+}
+.progress-bar-fill { 
+  height: 100%; border-radius: 6px; transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1); 
+}
+.progress-bar-target { 
+  position: absolute; left: 50%; top: -2px; bottom: -2px; width: 3px; background: #fff; z-index: 10; box-shadow: 0 0 5px rgba(255,255,255,0.5); 
+}
+
+.stat-insight { 
+  display: flex; gap: 12px; background: rgba(6, 182, 212, 0.1); padding: 16px; border-radius: 8px; border: 1px solid var(--accent); align-items: flex-start; 
+}
+.stat-insight .insight-icon { font-size: 1.5rem; }
+.stat-insight p { margin: 0; font-size: 0.95rem; line-height: 1.5; color: var(--text-main); }
+
+/* =========================================
+   サイバーパンク・ダッシュボード (TASKMASTER PRO)
+========================================= */
+.cyber-modal {
+  background: #050a10;
+  background-image: 
+    linear-gradient(rgba(0, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 20px 20px;
+  border: 1px solid #0ff;
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.1), inset 0 0 20px rgba(0, 255, 255, 0.05);
+  color: #fff;
+  font-family: 'Courier New', Consolas, monospace;
+  padding: 30px;
+  width: 900px;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%);
+}
+
+.cyber-title {
+  text-align: center;
+  color: #0ff;
+  font-size: 1.5rem;
+  letter-spacing: 4px;
+  text-shadow: 0 0 10px #0ff;
+  margin-bottom: 30px;
+  border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+  padding-bottom: 10px;
+}
+
+.cyber-dashboard {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr 1fr;
+  gap: 20px;
+}
+
+.cyber-panel {
+  border: 1px solid rgba(0, 255, 255, 0.3);
+  background: rgba(0, 20, 30, 0.8);
+  padding: 20px;
+  position: relative;
+}
+
+/* パネルの四隅の装飾 */
+.cyber-panel::before {
+  content: ''; position: absolute; top: -1px; left: -1px; width: 8px; height: 8px; border-top: 2px solid #0ff; border-left: 2px solid #0ff;
+}
+.cyber-panel::after {
+  content: ''; position: absolute; bottom: -1px; right: -1px; width: 8px; height: 8px; border-bottom: 2px solid #0ff; border-right: 2px solid #0ff;
+}
+
+.cyber-header {
+  color: #fff;
+  font-size: 1rem;
+  letter-spacing: 2px;
+  margin-bottom: 20px;
+  border-bottom: 1px dashed rgba(0, 255, 255, 0.4);
+  padding-bottom: 5px;
+}
+
+.cyber-value {
+  font-size: 4rem;
+  font-weight: bold;
+  text-align: center;
+  text-shadow: 0 0 15px currentColor;
+  margin: 10px 0;
+}
+.cyber-pink { color: #f0f; }
+.cyber-green { color: #0f0; }
+.cyber-cyan { color: #0ff; }
+
+.cyber-subtext {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  text-align: center;
+  letter-spacing: 1px;
+}
+
+.cyber-time-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.cyber-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+.cyber-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.cyber-bar-label {
+  width: 30px;
+  font-size: 0.85rem;
+  color: #fff;
+}
+.cyber-bar-bg {
+  flex: 1;
+  height: 14px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(0, 255, 255, 0.2);
+  padding: 2px;
+}
+.cyber-bar-fill {
+  height: 100%;
+  box-shadow: 0 0 10px currentColor;
+  transition: width 1s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.bg-green { background-color: #0f0; color: #0f0; }
+.bg-cyan { background-color: #0ff; color: #0ff; }
+
+.cyber-gauge {
+  position: relative;
+  width: 130px;
+  height: 130px;
+  margin: 0 auto 15px;
+  border-radius: 50%;
+  border: 4px solid var(--glow-color);
+  box-shadow: 0 0 20px var(--glow-color), inset 0 0 20px var(--glow-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* メーターの内側のライン */
+.cyber-gauge::before {
+  content: '';
+  position: absolute;
+  top: 10px; left: 10px; right: 10px; bottom: 10px;
+  border: 2px dashed rgba(255,255,255,0.2);
+  border-radius: 50%;
+}
+.cyber-gauge-text {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #fff;
+  text-shadow: 0 0 10px var(--glow-color);
+  z-index: 2;
+}
+
+.cyber-close-btn {
+  display: block;
+  margin: 30px auto 0;
+  background: rgba(0, 255, 255, 0.1);
+  border: 1px solid #0ff;
+  color: #0ff;
+  padding: 10px 40px;
+  font-family: inherit;
+  font-size: 1rem;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+}
+.cyber-close-btn:hover {
+  background: #0ff;
+  color: #000;
+  box-shadow: 0 0 20px #0ff;
+}
+
+/* =========================================
+   Task Master - Modern Dark UI Theme (Cyberpunk Edition)
+========================================= */
+
+:root {
+  --bg-main: #0f111a;
+  --bg-panel: #1a1d27;
+  --bg-hover: #232736;
+  --text-main: #e2e8f0;
+  --text-muted: #94a3b8;
+  --border-color: #2e3440;
+  --accent: #06b6d4;
+  --accent-glow: rgba(6, 182, 212, 0.4);
+  --color-todo: #0ea5e9;
+  --color-working: #8b5cf6;
+  --color-pending: #f59e0b;
+  --color-done: #10b981;
+  --color-danger: #ef4444;
+}
+
+body {
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  margin: 0;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  overflow-x: hidden;
+}
+
+.container { padding: 30px; max-width: 1600px; margin: 0 auto; }
+
+.header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border-color);
+}
+
+h1 { margin: 0; font-size: 1.8rem; letter-spacing: 1px; font-weight: 700; }
+h1::before {
+  content: ''; display: inline-block; width: 12px; height: 12px;
+  background-color: var(--accent); border-radius: 50%;
+  margin-right: 12px; box-shadow: 0 0 10px var(--accent-glow);
+}
+
+.header .controls { display: flex; gap: 16px; align-items: center; }
+
+input#search-input, select#filter-status, input#filter-date {
+  background: var(--bg-panel); color: var(--text-main);
+  border: 1px solid var(--border-color); padding: 10px 16px;
+  border-radius: 20px; outline: none; transition: all 0.2s ease;
+}
+input#search-input:focus, select#filter-status:focus, input#filter-date:focus { 
+  border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-glow);
+}
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) opacity(0.7); cursor: pointer;
+}
+
+.export-group { display: flex; gap: 12px; align-items: center; }
+
+/* 💡 ネオンSVGアイコン用のボタンリセット */
+.icon-btn {
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  padding: 6px !important;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+.icon-btn:hover {
+  background: rgba(0, 255, 255, 0.05) !important;
+  border: 1px solid rgba(0, 255, 255, 0.3) !important;
+  box-shadow: inset 0 0 15px rgba(0, 255, 255, 0.1), 0 0 15px rgba(0, 255, 255, 0.2);
+}
+
+/* 💡 SVG本体と発光エフェクト */
+.neon-svg {
+  width: 26px; height: 26px;
+  fill: none;
+  stroke-width: 1.5;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+.neon-circle { stroke: #0ff; filter: drop-shadow(0 0 3px #0ff); }
+.neon-bar-green { stroke: #0f0; filter: drop-shadow(0 0 3px #0f0); }
+.neon-bar-red { stroke: #f00; filter: drop-shadow(0 0 3px #f00); }
+.neon-bar-cyan { stroke: #0aa; filter: drop-shadow(0 0 3px #0aa); }
+.neon-gear { stroke: #0ff; filter: drop-shadow(0 0 3px #0ff); }
+
+button#export-csv {
+  background: transparent; color: var(--text-main); border: 1px solid var(--border-color);
+  padding: 10px 16px; border-radius: 20px; cursor: pointer; font-weight: 600; transition: all 0.2s ease;
+}
+button#export-csv:hover { border-color: var(--text-muted); background: var(--bg-hover); }
+
+button#add-task {
+  background: var(--accent); color: #000; border: none;
+  padding: 10px 20px; border-radius: 20px; cursor: pointer; font-weight: 700; transition: all 0.2s ease;
+}
+button#add-task:hover { transform: translateY(-2px); background: #08c8ea; }
+
+button#all-delete {
+  background: transparent; color: var(--color-danger); border: 1px solid var(--color-danger);
+  padding: 10px 16px; border-radius: 20px; cursor: pointer; font-weight: 600; transition: all 0.2s;
+}
+button#all-delete:hover { background: var(--color-danger); color: #000; }
+
+/* --- Tabulator --- */
+.tabulator { background-color: transparent !important; border: none !important; }
+.tabulator-header { background-color: var(--bg-panel) !important; border-bottom: 2px solid var(--border-color) !important; color: var(--text-muted) !important; font-weight: 600 !important; }
+.tabulator-col { background-color: transparent !important; border-right: none !important; }
+.tabulator-row { background-color: var(--bg-main) !important; border-bottom: 1px solid var(--border-color) !important; transition: background-color 0.2s ease; border-left: 4px solid transparent !important; }
+.tabulator-row.active-row { background-color: var(--bg-hover) !important; border-left: 4px solid var(--accent) !important; box-shadow: inset 0 0 10px var(--accent-glow); }
+.tabulator-cell { white-space: pre-wrap !important; word-wrap: break-word !important; height: auto !important; min-height: 56px; padding: 12px 16px !important; border-right: none !important; }
+.tabulator-cell.tabulator-editing { padding: 0 !important; background-color: var(--bg-panel) !important; box-shadow: inset 0 0 0 1px var(--accent) !important; }
+.tabulator-cell.tabulator-editing textarea, .tabulator-cell.tabulator-editing input { background-color: transparent !important; color: var(--text-main) !important; border: none !important; outline: none !important; padding: 12px 16px !important; width: 100% !important; height: auto !important; min-height: 56px !important; box-sizing: border-box !important; margin: 0 !important; border-radius: 0 !important; font-family: inherit; font-size: inherit; display: block !important; field-sizing: content !important; }
+.tabulator-cell.tabulator-editing textarea { overflow-y: hidden !important; resize: none !important; }
+input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none !important; margin: 0 !important; }
+input[type="number"] { -moz-appearance: textfield !important; }
+.status-badge { border-radius: 12px; font-size: 0.75rem; font-weight: 700; color: #fff; width: 85px; height: 28px; display: flex; align-items: center; justify-content: center; }
+.status-badge[data-status="To Do"] { background-color: var(--color-todo); }
+.status-badge[data-status="In Progress"] { background-color: var(--color-working); }
+.status-badge[data-status="Pending"] { background-color: var(--color-pending); }
+.status-badge[data-status="Done"] { background-color: var(--color-done); opacity: 0.6; }
+.priority-badge { padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; background: var(--bg-panel); }
+.priority-1 { color: var(--color-danger); }
+.priority-2 { color: var(--color-pending); }
+.priority-3 { color: var(--color-todo); }
+.priority-4 { color: var(--text-muted); }
+.delete-btn { background: transparent; color: var(--text-muted); border: none; padding: 8px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.delete-btn svg { width: 18px; height: 18px; transition: transform 0.2s ease; }
+.delete-btn:hover { background: rgba(239, 68, 68, 0.15); color: var(--color-danger); }
+.delete-btn:hover svg { transform: scale(1.1); }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--bg-main); }
+::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 5px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+.tabulator .tabulator-tableholder::-webkit-scrollbar { height: 12px; }
+.tabulator .tabulator-tableholder::-webkit-scrollbar-track { background: var(--bg-panel); }
+.tabulator .tabulator-tableholder::-webkit-scrollbar-thumb { background: #3b4252; border-radius: 6px; border: 3px solid var(--bg-panel); }
+.tabulator .tabulator-tableholder::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+/* =========================================
+   📊 Stats Dashboard Modal Styles
+========================================= */
+.cyber-modal {
+  background: #050a10;
+  background-image: 
+    linear-gradient(rgba(0, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 20px 20px;
+  border: 1px solid #0ff;
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.1), inset 0 0 20px rgba(0, 255, 255, 0.05);
+  color: #fff;
+  font-family: 'Courier New', Consolas, monospace;
+  padding: 30px;
+  width: 900px;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%);
+}
+
+.cyber-title {
+  text-align: center; color: #0ff; font-size: 1.5rem; letter-spacing: 4px; text-shadow: 0 0 10px #0ff;
+  margin-bottom: 30px; border-bottom: 1px solid rgba(0, 255, 255, 0.3); padding-bottom: 10px;
+}
+.cyber-dashboard { display: grid; grid-template-columns: 1fr 1.5fr 1fr; gap: 20px; }
+.cyber-panel { border: 1px solid rgba(0, 255, 255, 0.3); background: rgba(0, 20, 30, 0.8); padding: 20px; position: relative; }
+.cyber-panel::before { content: ''; position: absolute; top: -1px; left: -1px; width: 8px; height: 8px; border-top: 2px solid #0ff; border-left: 2px solid #0ff; }
+.cyber-panel::after { content: ''; position: absolute; bottom: -1px; right: -1px; width: 8px; height: 8px; border-bottom: 2px solid #0ff; border-right: 2px solid #0ff; }
+.cyber-header { color: #fff; font-size: 1rem; letter-spacing: 2px; margin-bottom: 20px; border-bottom: 1px dashed rgba(0, 255, 255, 0.4); padding-bottom: 5px; }
+.cyber-value { font-size: 4rem; font-weight: bold; text-align: center; text-shadow: 0 0 15px currentColor; margin: 10px 0; }
+.cyber-pink { color: #f0f; } .cyber-green { color: #0f0; } .cyber-cyan { color: #0ff; }
+.cyber-subtext { font-size: 0.75rem; color: rgba(255, 255, 255, 0.5); text-align: center; letter-spacing: 1px; }
+.cyber-time-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+.cyber-bars { display: flex; flex-direction: column; gap: 15px; }
+.cyber-bar-wrap { display: flex; align-items: center; gap: 10px; }
+.cyber-bar-label { width: 30px; font-size: 0.85rem; color: #fff; }
+.cyber-bar-bg { flex: 1; height: 14px; background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(0, 255, 255, 0.2); padding: 2px; }
+.cyber-bar-fill { height: 100%; box-shadow: 0 0 10px currentColor; transition: width 1s cubic-bezier(0.22, 1, 0.36, 1); }
+.bg-green { background-color: #0f0; color: #0f0; } .bg-cyan { background-color: #0ff; color: #0ff; }
+.cyber-gauge { position: relative; width: 130px; height: 130px; margin: 0 auto 15px; border-radius: 50%; border: 4px solid var(--glow-color); box-shadow: 0 0 20px var(--glow-color), inset 0 0 20px var(--glow-color); display: flex; align-items: center; justify-content: center; }
+.cyber-gauge::before { content: ''; position: absolute; top: 10px; left: 10px; right: 10px; bottom: 10px; border: 2px dashed rgba(255,255,255,0.2); border-radius: 50%; }
+.cyber-gauge-text { font-size: 2rem; font-weight: bold; color: #fff; text-shadow: 0 0 10px var(--glow-color); z-index: 2; }
+.cyber-close-btn { display: block; margin: 30px auto 0; background: rgba(0, 255, 255, 0.1); border: 1px solid #0ff; color: #0ff; padding: 10px 40px; font-family: inherit; font-size: 1rem; letter-spacing: 2px; cursor: pointer; transition: all 0.2s; box-shadow: 0 0 10px rgba(0, 255, 255, 0.2); }
+.cyber-close-btn:hover { background: #0ff; color: #000; box-shadow: 0 0 20px #0ff; }
+
+/* =========================================
+   ⚙️ Cyber Settings Modal Styles
+========================================= */
+.cyber-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 15px;
+  background: rgba(0, 0, 0, 0.5);
+  color: #0ff;
+  border: 1px solid rgba(0, 255, 255, 0.3);
+  border-radius: 0;
+  outline: none;
+  font-family: 'Courier New', Consolas, monospace;
+  font-size: 1rem;
+  letter-spacing: 1px;
+  transition: all 0.3s;
+  box-shadow: inset 0 0 10px rgba(0, 255, 255, 0.05);
+}
+.cyber-input:focus {
+  border-color: #0ff;
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.2), inset 0 0 10px rgba(0, 255, 255, 0.1);
+}
+
+.cyber-shortcuts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px 20px;
+}
+.shortcut-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+  letter-spacing: 1px;
+}
+.cyber-key {
+  background: rgba(0, 255, 255, 0.1);
+  border: 1px solid #0ff;
+  color: #0ff;
+  padding: 4px 8px;
+  border-radius: 3px;
+  font-weight: bold;
+  text-shadow: 0 0 5px #0ff;
+  box-shadow: 0 0 5px rgba(0, 255, 255, 0.2);
+}
+
+.cyber-btn-outline {
+  background: rgba(0, 255, 255, 0.05);
+  border: 1px solid #0ff;
+  color: #0ff;
+  padding: 10px 25px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.cyber-btn-outline:hover {
+  background: rgba(0, 255, 255, 0.2);
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+}
+
+.cyber-btn-solid {
+  background: #0ff;
+  border: 1px solid #0ff;
+  color: #000;
+  padding: 10px 25px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: bold;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
+}
+.cyber-btn-solid:hover {
+  background: #fff;
+  border-color: #fff;
+  box-shadow: 0 0 20px #fff;
+}
+
