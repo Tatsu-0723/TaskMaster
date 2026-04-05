@@ -27,13 +27,14 @@ Tauri + Rust + TypeScript で構築された、爆速・高機能なデスクト
 - `1`〜`4`: ステータス変更（ToDo / Working / Pending / Done）
 - `Ctrl + S`: CSVエクスポート
 
-## 🚀 セットアップ
-```bash
-# 依存関係のインストール
-npm install
+## 📦 アプリをすぐに使いたい方へ（インストール）
 
-# 開発モードの起動
-npm run tauri dev
+ソースコードからビルドする必要はありません。以下の手順ですぐにアプリを導入できます。
 
-# ビルド（.exe生成）
-npm run tauri build
+1. このページ右側にある **[Releases]** セクションから、最新のインストーラー（`Task Master_x.x.x_x64_en-US.exe` など）をダウンロードします。
+2. ダウンロードした `.exe` をダブルクリックしてインストールを実行してください。
+3. デスクトップに作成されたショートカットから起動します。
+
+> **💡 Tips（ローカルでビルドした方へ）**
+> ご自身で `npm run tauri build` を実行した場合、完成した `.exe` ファイル（インストーラー）はプロジェクト内の以下の場所に生成されます。
+> `src-tauri/target/release/bundle/nsis/`
